@@ -1,12 +1,123 @@
 ﻿<Window x:Class="Converter.MainView"
+        x:Name="MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Converter"
+        xmlns:h="clr-namespace:Converter.Helpers"
+        xmlns:vm="clr-namespace:Converter.ViewModels"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
-        Title="MainView" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="MainWindow"
+        xml:lang="fr-BE"
+        Width="{h:SettingsExtension Width}"
+        MinWidth="800"
+        Height="{h:SettingsExtension Height}"
+        MinHeight="600"
+        Left="{h:SettingsExtension Left}"
+        Top="{h:SettingsExtension Top}"
+        Background="{DynamicResource PrimaryBrush}"
+        WindowStyle="None"
+        ResizeMode="CanResize">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0"
+                      ResizeBorderThickness="5"
+                      GlassFrameThickness="0" />
+    </WindowChrome.WindowChrome>
+    <Border BorderThickness="2"
+            BorderBrush="{DynamicResource AccentBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <!--Toolbar-->
+            <Grid Grid.ColumnSpan="2">
+                <Border BorderThickness="0 0 0 2"
+                        BorderBrush="{DynamicResource AccentBrush}">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0"
+                                             EndPoint="1,1">
+                            <GradientStop Color="{DynamicResource SecondaryColor}"
+                                          Offset="0.4" />
+                            <GradientStop Color="{DynamicResource PrimaryColor}"
+                                          Offset="1.3" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <DockPanel VerticalAlignment="Center"
+                                   Margin="2">
+                            <DockPanel.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Africa"
+                                              Command="{Binding ThemeSelectCommand}"
+                                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Header}" />
+                                    <MenuItem Header="Atom Material"
+                                              Command="{Binding ThemeSelectCommand}"
+                                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Header}" />
+                                    <MenuItem Header="Dracula"
+                                              Command="{Binding ThemeSelectCommand}"
+                                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Header}" />
+                                    <MenuItem Header="Night Owl"
+                                              Command="{Binding ThemeSelectCommand}"
+                                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Header}" />
+                                    <MenuItem Header="Noctis"
+                                              Command="{Binding ThemeSelectCommand}"
+                                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Header}" />
+                                    <MenuItem Header="Rainglow"
+                                              Command="{Binding ThemeSelectCommand}"
+                                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Header}" />
+                                    <MenuItem Header="Shades Of Purple"
+                                              Command="{Binding ThemeSelectCommand}"
+                                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Header}" />
+                                    <MenuItem Header="SynthWave '84"
+                                              Command="{Binding ThemeSelectCommand}"
+                                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Header}" />
+                                    <MenuItem Header="Tokyo Night"
+                                              Command="{Binding ThemeSelectCommand}"
+                                              CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=Header}" />
+                                </ContextMenu>
+                            </DockPanel.ContextMenu>
+                            <Button Width="40"
+                                    Height="40"
+                                    DockPanel.Dock="Right"
+                                    Background="Transparent"
+                                    Margin="10 5"
+                                    Command="{Binding CloseCommand}">
+                                <Image Source="/Resources/Icons/close.png" />
+                            </Button>
+                            <Image Source="/Resources/Logos/logo.png"
+                                   Width="40"
+                                   Height="40"
+                                   Margin="10 0 0 0" />
+                            <StackPanel DockPanel.Dock="Right">
+                                <TextBlock FontWeight="Medium"
+                                           FontSize="22"
+                                           Padding="10 10 0 0"
+                                           VerticalAlignment="Center">
+                                <Run Text="FlexiWorkspace" />
+                                <Run Text="{x:Static h:Constants.Version}" />
+                                </TextBlock>
+                                <TextBlock Text="{Binding Theme}"
+                                           FontSize="16"
+                                           Padding="10 0"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>

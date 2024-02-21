@@ -6,16 +6,70 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Resources\Logos\logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Icons\add.png" />
+    <None Remove="Resources\Icons\close.png" />
+    <None Remove="Resources\Icons\contract.png" />
+    <None Remove="Resources\Icons\customer.png" />
+    <None Remove="Resources\Icons\delete.png" />
+    <None Remove="Resources\Icons\email.png" />
+    <None Remove="Resources\Icons\first.png" />
+    <None Remove="Resources\Icons\handshake.png" />
+    <None Remove="Resources\Icons\house.png" />
+    <None Remove="Resources\Icons\last.png" />
+    <None Remove="Resources\Icons\map.png" />
+    <None Remove="Resources\Icons\next.png" />
+    <None Remove="Resources\Icons\office.png" />
+    <None Remove="Resources\Icons\phone.png" />
+    <None Remove="Resources\Icons\previous.png" />
+    <None Remove="Resources\Icons\renter.png" />
+    <None Remove="Resources\Icons\tag.png" />
+    <None Remove="Resources\Icons\tenant.png" />
+    <None Remove="Resources\Icons\unlock.png" />
+    <None Remove="Resources\Icons\validate.png" />
+    <None Remove="Resources\Icons\view.png" />
+    <None Remove="Resources\Logos\logo.ico" />
+    <None Remove="Resources\Logos\logo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Logos\logo.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="GroupDocs.Parser" Version="23.12.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Converter.Business\Converter.Business.csproj" />
+    <Resource Include="Resources\Icons\add.png" />
+    <Resource Include="Resources\Icons\close.png" />
+    <Resource Include="Resources\Icons\contract.png" />
+    <Resource Include="Resources\Icons\customer.png" />
+    <Resource Include="Resources\Icons\delete.png" />
+    <Resource Include="Resources\Icons\email.png" />
+    <Resource Include="Resources\Icons\first.png" />
+    <Resource Include="Resources\Icons\handshake.png" />
+    <Resource Include="Resources\Icons\house.png" />
+    <Resource Include="Resources\Icons\last.png" />
+    <Resource Include="Resources\Icons\map.png" />
+    <Resource Include="Resources\Icons\next.png" />
+    <Resource Include="Resources\Icons\office.png" />
+    <Resource Include="Resources\Icons\phone.png" />
+    <Resource Include="Resources\Icons\previous.png" />
+    <Resource Include="Resources\Icons\renter.png" />
+    <Resource Include="Resources\Icons\tag.png" />
+    <Resource Include="Resources\Icons\tenant.png" />
+    <Resource Include="Resources\Icons\unlock.png" />
+    <Resource Include="Resources\Icons\validate.png" />
+    <Resource Include="Resources\Icons\view.png" />
+    <Resource Include="Resources\Logos\logo.ico" />
+    <Resource Include="Resources\Logos\logo.png" />
   </ItemGroup>
 
   <ItemGroup>

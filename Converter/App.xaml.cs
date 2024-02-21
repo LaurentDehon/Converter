@@ -1,6 +1,6 @@
-﻿using Converter.Business;
+﻿using Converter.Themes;
 using Converter.ViewModels;
-using Converter.Themes;
+using Converter.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Windows;
@@ -18,7 +18,6 @@ public partial class App : Application
         {
             services.AddSingleton(typeof(MainView));
             services.AddSingleton(typeof(MainViewModel));
-            services.AddSingleton(typeof(ConverterService));
         }).Build();
 
         FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement),
@@ -30,8 +29,10 @@ public partial class App : Application
         await AppHost!.StartAsync();
         ThemeManager.LoadTheme(Settings.Default.Theme);
 
-        MainView startupView = AppHost.Services.GetRequiredService<MainView>();
-        startupView.Show();
+        MainView mainView = AppHost.Services.GetRequiredService<MainView>();
+        MainViewModel mainViewModel = AppHost.Services.GetRequiredService<MainViewModel>();
+        mainView.DataContext = mainViewModel;
+        mainView.Show();
 
         base.OnStartup(e);
     }

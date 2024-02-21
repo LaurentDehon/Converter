@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:helpers="clr-namespace:FlexiWorkspace.Helpers">
 
-    <!--Normal Button-->
+    <!--Normal Round Button-->
     <Style TargetType="Button">
         <Setter Property="Cursor"
                 Value="Hand" />
@@ -24,6 +24,44 @@
                                               Offset="1.0" />
                             </LinearGradientBrush>
                         </Border.Background>
+                        <Grid>
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver"
+                                 Value="True">
+                            <Setter TargetName="MainBorder"
+                                    Property="Opacity"
+                                    Value="1" />
+                            <Setter TargetName="MainBorder"
+                                    Property="BorderBrush"
+                                    Value="{DynamicResource AccentBrush}">
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--Normal Rectangle Button-->
+    <Style TargetType="{x:Type Button}"
+           x:Key="RectangleButton">
+        <Setter Property="Cursor"
+                Value="Hand" />
+        <Setter Property="ToolTipService.InitialShowDelay"
+                Value="500" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="MainBorder"
+                            CornerRadius="5"
+                            BorderThickness="3"
+                            BorderBrush="Transparent"
+                            Background="{DynamicResource SecondaryBrush}">
                         <Grid>
                             <ContentPresenter Content="{TemplateBinding Content}"
                                               HorizontalAlignment="Center"

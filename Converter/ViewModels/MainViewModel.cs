@@ -70,6 +70,7 @@ public partial class MainViewModel : ObservableObject
                 await ExtractImagesAsync(file);
                 CreateArchive(file);
             }
+            Conversion = false;
             FileMessage = $"Done converting {filesCount} file(s)";
             Cursor = System.Windows.Input.Cursors.Arrow;
         }

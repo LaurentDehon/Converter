@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:h="clr-namespace:Converter.Helpers"
         xmlns:vm="clr-namespace:Converter.ViewModels"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
@@ -98,8 +99,8 @@
                                    Margin="10" />
                             <StackPanel DockPanel.Dock="Right">
                                 <TextBlock FontWeight="Medium"
-                                           FontSize="30"
-                                           Padding="10 10 10 25"
+                                           FontSize="45"
+                                           Padding="10 10 10 0"
                                            VerticalAlignment="Center">
                                 <Run Text="Comics Converter" />
                                 <Run Text="{x:Static h:Constants.Version}" />
@@ -114,7 +115,66 @@
                 </Border>
             </Grid>
             <DockPanel Grid.Row="1">
-                <StackPanel DockPanel.Dock="Top"
+                <StackPanel DockPanel.Dock="Left"
+                            Margin="20 40">
+                    <TextBlock Text="Convert to" 
+                               Margin="10"/>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="5 0 5 5">
+                        <CheckBox x:Name="chkCbz"
+                                  Checked="CheckBoxClick"
+                                  VerticalAlignment="Center"
+                                  Height="20"
+                                  Width="20">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Checked">
+                                    <i:InvokeCommandAction Command="{Binding SetFormatCommand}"
+                                                           CommandParameter="cbz" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </CheckBox>
+                        <TextBlock Text="CBZ"
+                                   VerticalAlignment="Center"
+                                   Padding="10 0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="5 0 5 5">
+                        <CheckBox x:Name="chkCbr"
+                                  Checked="CheckBoxClick"
+                                  VerticalAlignment="Center"
+                                  Height="20"
+                                  Width="20">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Checked">
+                                    <i:InvokeCommandAction Command="{Binding SetFormatCommand}"
+                                                           CommandParameter="cbr" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </CheckBox>
+                        <TextBlock Text="CBR"
+                                   VerticalAlignment="Center"
+                                   Padding="10 0" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="5 0 5 5">
+                        <CheckBox x:Name="chkImages"
+                                  Checked="CheckBoxClick"
+                                  VerticalAlignment="Center"
+                                  Height="20"
+                                  Width="20">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Checked">
+                                    <i:InvokeCommandAction Command="{Binding SetFormatCommand}"
+                                                           CommandParameter="images" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </CheckBox>
+                        <TextBlock Text="Images"
+                                   VerticalAlignment="Center"
+                                   Padding="10 0" />
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right"
                             Margin="20">
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Center"
@@ -138,7 +198,7 @@
                             Width="200"
                             Height="60"
                             Margin="10 30 10 10"
-                            IsEnabled="{Binding IsFree}"
+                            IsEnabled="{Binding IsReady}"
                             Style="{StaticResource RectangleButton}"
                             Command="{Binding ConvertCommand}" />
                     <ProgressBar Value="{Binding FilesProgress}"

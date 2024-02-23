@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Converter.Views;
@@ -13,6 +14,34 @@ public partial class MainView : Window
             Left = (SystemParameters.PrimaryScreenWidth - Width) / 2;
             Top = (SystemParameters.PrimaryScreenHeight - Height) / 2;
         }
+        if (Settings.Default.Format == "cbz")
+            chkCbz.IsChecked = true;
+        else if (Settings.Default.Format == "cbr")
+            chkCbr.IsChecked = true;
+        else
+            chkImages.IsChecked = true;
+    }
+
+    private void CheckBoxClick(object sender, RoutedEventArgs e)
+    {
+        CheckBox checkBox = (CheckBox)sender;
+
+        if (checkBox.Name == "chkCbz")
+        {
+            chkCbr.IsChecked = false;
+            chkImages.IsChecked = false;
+        }
+        else if (checkBox.Name == "chkCbr")
+        {
+            chkCbz.IsChecked = false;
+            chkImages.IsChecked = false;
+        }
+        else if (checkBox.Name == "chkImages")
+        {
+            chkCbz.IsChecked = false;
+            chkCbr.IsChecked = false;
+        }
+            
     }
 
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
@@ -35,5 +64,5 @@ public partial class MainView : Window
         if (WindowState == WindowState.Maximized)
             WindowState = WindowState.Normal;
         else WindowState = WindowState.Maximized;
-    }
+    }    
 }

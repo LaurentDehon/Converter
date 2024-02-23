@@ -17,5 +17,8 @@
     <Setting Name="Theme" Type="System.String" Scope="User">
       <Value Profile="(Default)">Dracula</Value>
     </Setting>
+    <Setting Name="Format" Type="System.String" Scope="User">
+      <Value Profile="(Default)">cbz</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

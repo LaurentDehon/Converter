@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Converter.Themes;
 using iTextSharp.text.pdf;
 using Microsoft.Win32;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
@@ -12,15 +13,25 @@ namespace Converter.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     List<string> files = [];
+    string Format;
     [ObservableProperty] string? _theme;
     [ObservableProperty] string? __fileMessage;
     [ObservableProperty] double _filesProgress;
     [ObservableProperty] bool _isFree = true;
+    [ObservableProperty] bool _isReady = false;
     [ObservableProperty] System.Windows.Input.Cursor _cursor = System.Windows.Input.Cursors.Arrow;
 
     public MainViewModel()
     {
         Theme = $"Theme {Settings.Default.Theme}";
+        Format = Settings.Default.Format;
+    }
+
+    [RelayCommand]
+    void SetFormat(string format)
+    {
+        Format = format;
+        Settings.Default.Format = format;
     }
 
     [RelayCommand]
@@ -32,6 +43,7 @@ public partial class MainViewModel : ObservableObject
         {
             files = [.. openFileDialog.FileNames];
             FileMessage = $"{files.Count} file(s) loaded";
+            IsReady = true;
         }
     }
 
@@ -45,6 +57,7 @@ public partial class MainViewModel : ObservableObject
             foreach (string folder in openFolderDialog.FolderNames)
                 files.AddRange(Directory.GetFiles(folder, "*.pdf"));
             FileMessage = $"{files.Count} file(s) loaded from {openFolderDialog.FolderNames.Length} folder(s)";
+            IsReady = true;
         }
     }
 
@@ -60,12 +73,16 @@ public partial class MainViewModel : ObservableObject
             foreach (string file in files)
             {
                 await ExtractImagesAsync(file);
-                CreateArchive(file);
+                if (Format != "images")
+                    CreateArchive(file);
+                else
+                    Process.Start("explorer.exe", GetFileFolder(file));
                 processedFiles++;
                 FilesProgress = (double)processedFiles / files.Count * 100;
             }
             FileMessage = $"{filesCount} file(s) successfully converted";
             Cursor = System.Windows.Input.Cursors.Arrow;
+            IsFree = true;
         }
     }
 
@@ -107,7 +124,7 @@ public partial class MainViewModel : ObservableObject
     void CreateArchive(string file)
     {
         string fileFolder = GetFileFolder(file);
-        string cbzFile = $"{fileFolder}.cbz";
+        string cbzFile = $"{fileFolder}.{Format}";
         FileMessage = $"Creating archive {cbzFile}";
         if (File.Exists(cbzFile))
             File.Delete(cbzFile);

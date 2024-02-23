@@ -1,13 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Converter.Themes;
+using iTextSharp.text.pdf;
 using Microsoft.Win32;
-using Pdf2Image;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
 using System.Windows;
 
 namespace Converter.ViewModels;
@@ -22,7 +19,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] System.Windows.Input.Cursor _cursor = System.Windows.Input.Cursors.Arrow;
 
     public MainViewModel()
-    { 
+    {
         Theme = $"Theme {Settings.Default.Theme}";
     }
 
@@ -67,7 +64,7 @@ public partial class MainViewModel : ObservableObject
                 processedFiles++;
                 FilesProgress = (double)processedFiles / files.Count * 100;
             }
-            FileMessage = $"Done converting {filesCount} file(s)";
+            FileMessage = $"{filesCount} file(s) successfully converted";
             Cursor = System.Windows.Input.Cursors.Arrow;
         }
     }
@@ -91,15 +88,19 @@ public partial class MainViewModel : ObservableObject
     {
         string fileFolder = GetFileFolder(file);
         List<string> extractedImages = [];
-        
+
         Directory.CreateDirectory(GetFileFolder(file));
-        
+
         await Task.Run(() =>
         {
-            FileMessage = $@"Extracting images from {Path.GetFileName(file)}";
-            List<Image> images = PdfSplitter.GetImages(file, PdfSplitter.Scale.High);
-            FileMessage = $@"Writing images to disk";
-            PdfSplitter.WriteImages(file, fileFolder, PdfSplitter.Scale.High, PdfSplitter.CompressionLevel.None);
+            FileMessage = $"Converting {Path.GetFileName(file)}";
+            using PdfReader reader = new(file);
+            for (int pageNumber = 1; pageNumber <= reader.NumberOfPages; pageNumber++)
+            {
+                PdfDictionary page = reader.GetPageN(pageNumber);
+                PdfDictionary resources = page.GetAsDict(PdfName.RESOURCES);
+                ExtractImagesFromResources(resources, fileFolder, pageNumber);
+            }
         });
     }
 
@@ -125,5 +126,43 @@ public partial class MainViewModel : ObservableObject
     static string GetFileFolder(string file)
     {
         return Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileNameWithoutExtension(file));
+    }
+
+    static void ExtractImagesFromResources(PdfDictionary resources, string outputFolder, int pageNumber)
+    {
+        if (resources == null)
+            return;
+
+        PdfDictionary xObjects = resources.GetAsDict(PdfName.XOBJECT);
+        if (xObjects == null)
+            return;
+
+        foreach (var key in xObjects.Keys)
+        {
+            PdfObject obj = xObjects.Get(key);
+            if (obj == null || !obj.IsIndirect())
+                continue;
+
+            PdfDictionary dict = (PdfDictionary)PdfReader.GetPdfObject(obj);
+            PdfName subType = dict.GetAsName(PdfName.SUBTYPE);
+
+            if (PdfName.IMAGE.Equals(subType))
+            {
+                byte[] bytes = [];
+                if (obj.IsStream())
+                    bytes = PdfReader.GetStreamBytesRaw((PRStream)obj);
+                else if (obj.IsIndirect())
+                {
+                    PdfObject directObject = PdfReader.GetPdfObjectRelease(obj);
+                    if (directObject != null && directObject.IsStream())
+                        bytes = PdfReader.GetStreamBytesRaw((PRStream)directObject);
+                }
+
+                if (bytes != null)
+                    File.WriteAllBytes($@"{outputFolder}\{pageNumber}.jpeg", bytes);
+                else if (PdfName.FORM.Equals(subType))
+                    ExtractImagesFromResources(dict.GetAsDict(PdfName.RESOURCES), outputFolder, pageNumber);
+            }
+        }
     }
 }

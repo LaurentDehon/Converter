@@ -20,6 +20,8 @@ public partial class MainView : Window
             chkCbr.IsChecked = true;
         else
             chkImages.IsChecked = true;
+
+        chkFolderOpen.IsChecked = Settings.Default.FolderOpen;
     }
 
     private void CheckBoxClick(object sender, RoutedEventArgs e)
@@ -41,7 +43,10 @@ public partial class MainView : Window
             chkCbz.IsChecked = false;
             chkCbr.IsChecked = false;
         }
-            
+        else if (checkBox.Name == "chkFolderOpen")
+            Settings.Default.FolderOpen = (bool)chkFolderOpen.IsChecked!;
+
+
     }
 
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)

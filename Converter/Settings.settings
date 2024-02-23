@@ -20,5 +20,8 @@
     <Setting Name="Format" Type="System.String" Scope="User">
       <Value Profile="(Default)">cbz</Value>
     </Setting>
+    <Setting Name="FolderOpen" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

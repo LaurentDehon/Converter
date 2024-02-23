@@ -6,15 +6,22 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ProgressBar">
-                    <Grid x:Name="PART_Track">
-                        <Rectangle x:Name="PART_Indicator"
-                                   HorizontalAlignment="Left"
-                                   Fill="{DynamicResource AccentBrush}"
-                                   Height="{TemplateBinding Height}"
+                    <Grid>
+                        <Rectangle x:Name="BackgroundRect"
+                                   Fill="{DynamicResource SecondaryBrush}"
                                    RadiusX="8"
                                    RadiusY="8" />
+                        <Grid x:Name="PART_Track">
+                            <Rectangle x:Name="PART_Indicator"
+                                       HorizontalAlignment="Left"
+                                       Fill="{DynamicResource AccentBrush}"
+                                       Height="{TemplateBinding Height}"
+                                       RadiusX="8"
+                                       RadiusY="8" />
+                        </Grid>
                     </Grid>
                 </ControlTemplate>
+
             </Setter.Value>
         </Setter>
     </Style>    

@@ -12,19 +12,25 @@ namespace Converter.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
+    List<string> folders = [];
     List<string> files = [];
     string Format;
     [ObservableProperty] string? _theme;
     [ObservableProperty] string? __fileMessage;
+    [ObservableProperty] string? __imageMessage;
     [ObservableProperty] double _filesProgress;
+    [ObservableProperty] double _fileProgress;
     [ObservableProperty] bool _isFree = true;
     [ObservableProperty] bool _isReady = false;
+    [ObservableProperty] bool _conversion = false;
+    [ObservableProperty] bool _folderOpen;
     [ObservableProperty] System.Windows.Input.Cursor _cursor = System.Windows.Input.Cursors.Arrow;
 
     public MainViewModel()
     {
         Theme = $"Theme {Settings.Default.Theme}";
         Format = Settings.Default.Format;
+        FolderOpen = Settings.Default.FolderOpen;
     }
 
     [RelayCommand]
@@ -42,6 +48,7 @@ public partial class MainViewModel : ObservableObject
         if (openFileDialog.ShowDialog() == true)
         {
             files = [.. openFileDialog.FileNames];
+            folders.Add(Path.GetDirectoryName(files[0])!);
             FileMessage = $"{files.Count} file(s) loaded";
             IsReady = true;
         }
@@ -56,6 +63,7 @@ public partial class MainViewModel : ObservableObject
         {
             foreach (string folder in openFolderDialog.FolderNames)
                 files.AddRange(Directory.GetFiles(folder, "*.pdf"));
+            folders.AddRange(openFolderDialog.FolderNames);
             FileMessage = $"{files.Count} file(s) loaded from {openFolderDialog.FolderNames.Length} folder(s)";
             IsReady = true;
         }
@@ -68,21 +76,26 @@ public partial class MainViewModel : ObservableObject
         {
             Cursor = System.Windows.Input.Cursors.Wait;
             IsFree = false;
+            Conversion = true;
             int filesCount = files.Count;
             int processedFiles = 0;
             foreach (string file in files)
             {
                 await ExtractImagesAsync(file);
                 if (Format != "images")
-                    CreateArchive(file);
-                else
-                    Process.Start("explorer.exe", GetFileFolder(file));
+                    CreateArchive(file);                
                 processedFiles++;
                 FilesProgress = (double)processedFiles / files.Count * 100;
             }
             FileMessage = $"{filesCount} file(s) successfully converted";
             Cursor = System.Windows.Input.Cursors.Arrow;
+            if (FolderOpen)
+                foreach(string folder in folders)
+                    Process.Start("explorer.exe", folder);
             IsFree = true;
+            IsReady = false;
+            files.Clear();
+            folders.Clear();
         }
     }
 
@@ -117,7 +130,10 @@ public partial class MainViewModel : ObservableObject
                 PdfDictionary page = reader.GetPageN(pageNumber);
                 PdfDictionary resources = page.GetAsDict(PdfName.RESOURCES);
                 ExtractImagesFromResources(resources, fileFolder, pageNumber);
+                FileProgress = (double)pageNumber / reader.NumberOfPages * 100;
+                ImageMessage = $"Extracting image {pageNumber}";
             }
+            ImageMessage = $"{Path.GetFileName(file)} done";
         });
     }
 
@@ -135,8 +151,12 @@ public partial class MainViewModel : ObservableObject
     void Reset()
     {
         IsFree = true;
+        Conversion = false;
         FileMessage = string.Empty;
+        ImageMessage = string.Empty;
         FilesProgress = 0;
+        FileProgress = 0;
+        folders = [];
         files = [];
     }
 

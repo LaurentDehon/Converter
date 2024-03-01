@@ -4,8 +4,6 @@ using Converter.Helpers;
 using Converter.Themes;
 using iTextSharp.text.pdf;
 using Microsoft.Win32;
-using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
@@ -17,15 +15,14 @@ public partial class MainViewModel : ObservableObject
     List<string> folders = [];
     List<string> files = [];
     string OutputFormat, InputFormat;
+    bool FileSelection = false;
 
     [ObservableProperty] string? _theme;
     [ObservableProperty] string? __fileMessage;
-    [ObservableProperty] string? __imageMessage;
     [ObservableProperty] double _filesProgress;
-    [ObservableProperty] double _fileProgress;
-    [ObservableProperty] bool _notReadyToConvert = true;
-    [ObservableProperty] bool _readyToConvert = false;
-    [ObservableProperty] bool _showFileProgress = false;
+    [ObservableProperty] bool _openButtonsEnabled = true;
+    [ObservableProperty] bool _convertButtonEnabled = false;
+    [ObservableProperty] bool _cancelButtonEnabled = false;
     [ObservableProperty] bool _showFilesProgress = false;
     [ObservableProperty] bool _checkboxesEnabled = true;
     [ObservableProperty] System.Windows.Input.Cursor _cursor = System.Windows.Input.Cursors.Arrow;
@@ -78,8 +75,10 @@ public partial class MainViewModel : ObservableObject
             files = [.. openFileDialog.FileNames];
             folders.Add(Path.GetDirectoryName(files[0])!);
             FileMessage = $"{files.Count} file(s) loaded";
-            ReadyToConvert = true;
+            ConvertButtonEnabled = true;
+            CancelButtonEnabled = true;
             CheckboxesEnabled = false;
+            FileSelection = true;
         }
     }
 
@@ -102,12 +101,13 @@ public partial class MainViewModel : ObservableObject
                 if (InputFormat != "images")
                     files.AddRange(Directory.GetFiles(folder, $"*.{InputFormat.ToLower()}"));
                 else
-                    files.AddRange(Directory.GetFiles(folder, "*.*").Where(f => Constants.ImagesExtensions.Contains(Path.GetExtension(f)[1..])));
+                    files.AddRange(Helper.GetFilesFrom(folder, Constants.ImagesExtensions, false));
             }
                 
             folders.AddRange(openFolderDialog.FolderNames);
             FileMessage = $"{files.Count} file(s) loaded from {openFolderDialog.FolderNames.Length} folder(s)";
-            ReadyToConvert = true;
+            ConvertButtonEnabled = true;
+            CancelButtonEnabled = true;
             CheckboxesEnabled = false;
         }
     }
@@ -118,53 +118,63 @@ public partial class MainViewModel : ObservableObject
         if (files.Count > 0)
         {
             Cursor = System.Windows.Input.Cursors.Wait;
-            ReadyToConvert = false;
-            NotReadyToConvert = false;
+            OpenButtonsEnabled = false;
+            ConvertButtonEnabled = false;
+            CancelButtonEnabled = false;
             ShowFilesProgress = true;
 
-            int filesCount;
-            if (InputFormat == "images")
+            int filesCount = files.Count;
+            int processedFiles = 0;
+            foreach (string file in files) 
             {
-                if (folders.Count > 1)
+                if (InputFormat == "pdf" && OutputFormat.Contains("cb"))
                 {
-                    filesCount = folders.Count;
-                    int processedFiles = 0;
+                    await ExtractImagesAsync(file);
+                    string outputFolder = Directory.GetParent(GetFileFolder(file))!.FullName;
+                    string[] images = Helper.GetFilesFrom(GetFileFolder(file), Constants.ImagesExtensions, false);
+                    string outputFile = $"{Path.GetFileNameWithoutExtension(file)}.{OutputFormat}";
+                    await CreateArchiveAsync(images, outputFolder, outputFile);
+                    Directory.Delete(GetFileFolder(file), true);
+                }
+                else if (InputFormat == "pdf" && OutputFormat == "images")
+                {
+                    await ExtractImagesAsync(file);
+                }
+                else if (InputFormat.Contains("cb") && OutputFormat.Contains("cb"))
+                {
+                    File.Move(file, Path.ChangeExtension(file, OutputFormat));
+                }
+                else if (InputFormat.Contains("cb") && OutputFormat == "images") 
+                {
+                    string outputFolder = GetFileFolder(file);
+                    await Task.Run(() => ZipFile.ExtractToDirectory(file, outputFolder, true));                    
+                }
+                else if (InputFormat == "images" && OutputFormat.Contains("cb"))
+                {
+                    int foldersCount = folders.Count;
+                    int processedFolders = 0;
                     foreach (string folder in folders)
-                    {
-                        await CreateArchive(folder: folder);
-                        processedFiles++;
-                        FilesProgress = (double)processedFiles / filesCount * 100;
+                    {                        
+                        string outputFile = $"{new DirectoryInfo(folder).Name}.{OutputFormat}";
+                        if (FileSelection)
+                            await CreateArchiveAsync([.. files], folder, outputFile);
+                        else
+                            await CreateArchiveAsync(Helper.GetFilesFrom(folder, Constants.ImagesExtensions, false), Directory.GetParent(GetFileFolder(folder))!.FullName, outputFile);
+                        processedFolders++;
+                        FilesProgress = (double)processedFolders / foldersCount * 100;
                     }
+                    break;
                 }
-                else
-                {
-                    filesCount = files.Count;
-                    await CreateArchive(files: files);
-                }
-            }
-            else
-            {
-                ShowFileProgress = true;
-                filesCount = files.Count;
-                int processedFiles = 0;
-                foreach (string file in files)
-                {
-                    if (InputFormat == "pdf")
-                        await ExtractImagesAsync(file);
-                    if (InputFormat.Contains("cb") && OutputFormat.Contains("cb"))
-                        File.Move(file, Path.ChangeExtension(file, OutputFormat));
-                    else if (OutputFormat != "images")
-                        await CreateArchive(file: file);                
-                    processedFiles++;
-                    FilesProgress = (double)processedFiles / filesCount * 100;
-                }
+                processedFiles++;
+                FilesProgress = (double)processedFiles / filesCount * 100;
             }
 
-            FileMessage = $"{filesCount} file(s) successfully converted";
+            string text = OutputFormat == "images" ? "extracted" : "converted";
+            FileMessage = $"{files.Count} file(s) successfully {text}";
             Cursor = System.Windows.Input.Cursors.Arrow;
-
-            NotReadyToConvert = true;
-            ReadyToConvert = false;
+            OpenButtonsEnabled = true;
+            ConvertButtonEnabled = false;
+            CancelButtonEnabled = false;
             CheckboxesEnabled = true;
             files.Clear();
             folders.Clear();
@@ -208,75 +218,38 @@ public partial class MainViewModel : ObservableObject
                 PdfDictionary page = reader.GetPageN(pageNumber);
                 PdfDictionary resources = page.GetAsDict(PdfName.RESOURCES);
                 ExtractImagesFromResources(resources, fileFolder, pageNumber);
-                FileProgress = (double)pageNumber / reader.NumberOfPages * 100;
-                ImageMessage = $"Extracting image {pageNumber}";
             }
-            ImageMessage = $"{Path.GetFileName(file)} done";
         });
     }
 
-    async Task CreateArchive(string? file = null, string? folder = null, List<string>? files = null)
+    async Task CreateArchiveAsync(string[] files, string outputFolder, string outputFile)
     {
         await Task.Run(() =>
         {
-            if (file != null) 
-            {
-                string fileFolder = GetFileFolder(file);
-                string outputFile = $"{fileFolder}.{OutputFormat}";
-                FileMessage = $"Creating archive {outputFile}";
+            string fullPath = Path.Combine(outputFolder, outputFile);
+            FileMessage = $"Creating archive {outputFile}";
 
-                if (File.Exists(outputFile))
-                    File.Delete(outputFile);
+            if (File.Exists(fullPath))
+                File.Delete(fullPath);
 
-                ZipFile.CreateFromDirectory(fileFolder, outputFile);
-                Directory.Delete(fileFolder, true);
-            }
-            else if (folder != null)
-            {
-                string outputFolder = Directory.GetParent(folder)!.FullName;
-                string outputFile = $"{new DirectoryInfo(folder).Name}.{OutputFormat}";
-                FileMessage = $"Creating archive {outputFile}";
-
-                if (File.Exists(Path.Combine(outputFolder, outputFile)))
-                    File.Delete(Path.Combine(outputFolder, outputFile));
-
-                ZipFile.CreateFromDirectory(folder, Path.Combine(outputFolder, outputFile));       
-            }
-            else if (files != null)
-            {
-                string outputFolder = Directory.GetParent(files[0])!.FullName;
-                string outputFile = $"{new DirectoryInfo(outputFolder).Name}.{OutputFormat}";
-                FileMessage = $"Creating archive {outputFile}";
-
-                if (File.Exists(Path.Combine(outputFolder, outputFile)))
-                    File.Delete(Path.Combine(outputFolder, outputFile));
-
-                using ZipArchive archive = ZipFile.Open(Path.Combine(outputFolder, outputFile), ZipArchiveMode.Create);
-                int filesCount = files.Count;
-                int processedFiles = 0;
-                foreach (string f in files)
-                {
-                    archive.CreateEntryFromFile(f, Path.GetRelativePath(outputFolder, f));
-                    processedFiles++;
-                    FilesProgress = (double)processedFiles / filesCount * 100;
-                }
-            }
+            using ZipArchive archive = ZipFile.Open(fullPath, ZipArchiveMode.Create);
+            foreach (string file in files)
+                archive.CreateEntryFromFile(file, Path.GetFileName(file));
         });
     }
 
     void Reset()
     {
-        NotReadyToConvert = true;
-        ReadyToConvert = false;
+        OpenButtonsEnabled = true;
+        ConvertButtonEnabled = false;
+        CancelButtonEnabled = false;
         CheckboxesEnabled = true;
-        ShowFileProgress = false;
         ShowFilesProgress = false;
         FileMessage = string.Empty;
-        ImageMessage = string.Empty;
+        FileSelection = false;
         FilesProgress = 0;
-        FileProgress = 0;
-        folders = [];
-        files = [];
+        folders.Clear();
+        files.Clear();
     }
 
     static string GetFileFolder(string file)

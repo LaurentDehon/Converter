@@ -269,14 +269,14 @@
                                 Width="200"
                                 Height="60"
                                 Margin="10"
-                                IsEnabled="{Binding NotReadyToConvert}"
+                                IsEnabled="{Binding OpenButtonsEnabled}"
                                 Style="{StaticResource RectangleButton}"
                                 Command="{Binding OpenFileCommand}" />
                         <Button Content="Open folder(s)"
                                 Width="200"
                                 Height="60"
                                 Margin="10"
-                                IsEnabled="{Binding NotReadyToConvert}"
+                                IsEnabled="{Binding OpenButtonsEnabled}"
                                 Style="{StaticResource RectangleButton}"
                                 Command="{Binding OpenFolderCommand}" />
                     </StackPanel>
@@ -284,14 +284,14 @@
                             Width="200"
                             Height="60"
                             Margin="10 0 10 5"
-                            IsEnabled="{Binding ReadyToConvert}"
+                            IsEnabled="{Binding ConvertButtonEnabled}"
                             Style="{StaticResource RectangleButton}"
                             Command="{Binding ConvertCommand}" />
                     <Button Content="Cancel"
                             Width="200"
                             Height="40"
                             Margin="10 0 10 10"
-                            Visibility="{Binding ReadyToConvert, Converter={StaticResource BoolToVisibility}}"
+                            IsEnabled="{Binding CancelButtonEnabled}"
                             Style="{StaticResource RectangleButton}"
                             Command="{Binding CancelCommand}" />
                     <TextBlock Text="{Binding FileMessage}"
@@ -308,7 +308,7 @@
                                  Width="250"
                                  Height="20"
                                  Visibility="{Binding ShowFilesProgress, Converter={StaticResource BoolToVisibility}}" />
-                    <TextBlock Text="{Binding ImageMessage}"
+                    <!--<TextBlock Text="{Binding ImageMessage}"
                                TextWrapping="Wrap"
                                HorizontalAlignment="Center"
                                TextAlignment="Center"
@@ -321,7 +321,7 @@
                                  Margin="10"
                                  Width="250"
                                  Height="20"
-                                 Visibility="{Binding ShowFileProgress, Converter={StaticResource BoolToVisibility}}" />
+                                 Visibility="{Binding ShowFileProgress, Converter={StaticResource BoolToVisibility}}" />-->
                 </StackPanel>
             </DockPanel>
         </Grid>

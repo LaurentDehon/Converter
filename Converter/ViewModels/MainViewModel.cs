@@ -127,18 +127,17 @@ public partial class MainViewModel : ObservableObject
             int processedFiles = 0;
             foreach (string file in files) 
             {
-                if (InputFormat == "pdf" && OutputFormat.Contains("cb"))
+                if (InputFormat == "pdf")
                 {
                     await ExtractImagesAsync(file);
-                    string outputFolder = Directory.GetParent(GetFileFolder(file))!.FullName;
-                    string[] images = Helper.GetFilesFrom(GetFileFolder(file), Constants.ImagesExtensions, false);
-                    string outputFile = $"{Path.GetFileNameWithoutExtension(file)}.{OutputFormat}";
-                    await CreateArchiveAsync(images, outputFolder, outputFile);
-                    Directory.Delete(GetFileFolder(file), true);
-                }
-                else if (InputFormat == "pdf" && OutputFormat == "images")
-                {
-                    await ExtractImagesAsync(file);
+                    if (OutputFormat.Contains("cb"))
+                    {
+                        string outputFolder = Directory.GetParent(GetFileFolder(file))!.FullName;
+                        string[] images = Helper.GetFilesFrom(GetFileFolder(file), Constants.ImagesExtensions, false);
+                        string outputFile = $"{Path.GetFileNameWithoutExtension(file)}.{OutputFormat}";
+                        await CreateArchiveAsync(images, outputFolder, outputFile);
+                        Directory.Delete(GetFileFolder(file), true); 
+                    }
                 }
                 else if (InputFormat.Contains("cb") && OutputFormat.Contains("cb"))
                 {
@@ -146,7 +145,7 @@ public partial class MainViewModel : ObservableObject
                 }
                 else if (InputFormat.Contains("cb") && OutputFormat == "images") 
                 {
-                    string outputFolder = GetFileFolder(file);
+                    string outputFolder = Directory.GetParent(GetFileFolder(file))!.FullName;
                     await Task.Run(() => ZipFile.ExtractToDirectory(file, outputFolder, true));                    
                 }
                 else if (InputFormat == "images" && OutputFormat.Contains("cb"))
@@ -288,7 +287,7 @@ public partial class MainViewModel : ObservableObject
                 }
 
                 if (bytes != null)
-                    File.WriteAllBytes($@"{outputFolder}\{pageNumber}.jpeg", bytes);
+                    File.WriteAllBytes($@"{outputFolder}\{pageNumber:000}.jpeg", bytes);
                 else if (PdfName.FORM.Equals(subType))
                     ExtractImagesFromResources(dict.GetAsDict(PdfName.RESOURCES), outputFolder, pageNumber);
             }

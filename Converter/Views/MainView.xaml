@@ -11,8 +11,8 @@
         mc:Ignorable="d"
         Title="MainWindow"
         xml:lang="fr-BE"
-        Width="700"
-        Height="500"
+        Width="800"
+        Height="550"
         Left="{h:SettingsExtension Left}"
         Top="{h:SettingsExtension Top}"
         Background="{DynamicResource PrimaryBrush}"
@@ -121,18 +121,38 @@
                         DockPanel.Dock="Left"
                         Margin="10">
                     <StackPanel Margin="20">
-                        <TextBlock Text="Output format"
+                        <TextBlock Text="Input format"
                                    Margin="10" />
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
-                            <CheckBox x:Name="chkCbz"
+                            <CheckBox x:Name="chkInPdf"
                                       Checked="CheckBoxClick"
+                                      IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
                                       Width="20">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Checked">
-                                        <i:InvokeCommandAction Command="{Binding SetFormatCommand}"
+                                        <i:InvokeCommandAction Command="{Binding SetInputFormatCommand}"
+                                                               CommandParameter="pdf" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </CheckBox>
+                            <TextBlock Text="PDF"
+                                       VerticalAlignment="Center"
+                                       Padding="10 0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="15 0 5 5">
+                            <CheckBox x:Name="chkInCbz"
+                                      Checked="CheckBoxClick"
+                                      IsEnabled="{Binding CheckboxesEnabled}"
+                                      VerticalAlignment="Center"
+                                      Height="20"
+                                      Width="20">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Checked">
+                                        <i:InvokeCommandAction Command="{Binding SetInputFormatCommand}"
                                                                CommandParameter="cbz" />
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
@@ -143,14 +163,15 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
-                            <CheckBox x:Name="chkCbr"
+                            <CheckBox x:Name="chkInCbr"
                                       Checked="CheckBoxClick"
+                                      IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
                                       Width="20">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Checked">
-                                        <i:InvokeCommandAction Command="{Binding SetFormatCommand}"
+                                        <i:InvokeCommandAction Command="{Binding SetInputFormatCommand}"
                                                                CommandParameter="cbr" />
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
@@ -161,14 +182,15 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
-                            <CheckBox x:Name="chkImages"
+                            <CheckBox x:Name="chkInImages"
                                       Checked="CheckBoxClick"
+                                      IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
                                       Width="20">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="Checked">
-                                        <i:InvokeCommandAction Command="{Binding SetFormatCommand}"
+                                        <i:InvokeCommandAction Command="{Binding SetInputFormatCommand}"
                                                                CommandParameter="images" />
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
@@ -177,16 +199,62 @@
                                        VerticalAlignment="Center"
                                        Padding="10 0" />
                         </StackPanel>
+                        <TextBlock Text="Output format"
+                                   Margin="10" />
                         <StackPanel Orientation="Horizontal"
-                                    Margin="5 30 5 5">
-                            <CheckBox x:Name="chkFolderOpen"
-                                      IsChecked="{Binding FolderOpen}"
+                                    Margin="15 0 5 5">
+                            <CheckBox x:Name="chkOutCbz"
                                       Checked="CheckBoxClick"
-                                      Unchecked="CheckBoxClick"
+                                      IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
-                                      Width="20" />
-                            <TextBlock Text="Open folder"
+                                      Width="20">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Checked">
+                                        <i:InvokeCommandAction Command="{Binding SetOutputFormatCommand}"
+                                                               CommandParameter="cbz" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </CheckBox>
+                            <TextBlock Text="CBZ"
+                                       VerticalAlignment="Center"
+                                       Padding="10 0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="15 0 5 5">
+                            <CheckBox x:Name="chkOutCbr"
+                                      Checked="CheckBoxClick"
+                                      IsEnabled="{Binding CheckboxesEnabled}"
+                                      VerticalAlignment="Center"
+                                      Height="20"
+                                      Width="20">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Checked">
+                                        <i:InvokeCommandAction Command="{Binding SetOutputFormatCommand}"
+                                                               CommandParameter="cbr" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </CheckBox>
+                            <TextBlock Text="CBR"
+                                       VerticalAlignment="Center"
+                                       Padding="10 0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="15 0 5 5">
+                            <CheckBox x:Name="chkOutImages"
+                                      Checked="CheckBoxClick"
+                                      IsEnabled="{Binding CheckboxesEnabled}"
+                                      VerticalAlignment="Center"
+                                      Height="20"
+                                      Width="20">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Checked">
+                                        <i:InvokeCommandAction Command="{Binding SetOutputFormatCommand}"
+                                                               CommandParameter="images" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </CheckBox>
+                            <TextBlock Text="Images"
                                        VerticalAlignment="Center"
                                        Padding="10 0" />
                         </StackPanel>
@@ -201,24 +269,31 @@
                                 Width="200"
                                 Height="60"
                                 Margin="10"
-                                IsEnabled="{Binding IsFree}"
+                                IsEnabled="{Binding NotReadyToConvert}"
                                 Style="{StaticResource RectangleButton}"
                                 Command="{Binding OpenFileCommand}" />
                         <Button Content="Open folder(s)"
                                 Width="200"
                                 Height="60"
                                 Margin="10"
-                                IsEnabled="{Binding IsFree}"
+                                IsEnabled="{Binding NotReadyToConvert}"
                                 Style="{StaticResource RectangleButton}"
                                 Command="{Binding OpenFolderCommand}" />
                     </StackPanel>
                     <Button Content="Convert"
                             Width="200"
                             Height="60"
-                            Margin="10 30 10 10"
-                            IsEnabled="{Binding IsReady}"
+                            Margin="10 0 10 5"
+                            IsEnabled="{Binding ReadyToConvert}"
                             Style="{StaticResource RectangleButton}"
                             Command="{Binding ConvertCommand}" />
+                    <Button Content="Cancel"
+                            Width="200"
+                            Height="40"
+                            Margin="10 0 10 10"
+                            Visibility="{Binding ReadyToConvert, Converter={StaticResource BoolToVisibility}}"
+                            Style="{StaticResource RectangleButton}"
+                            Command="{Binding CancelCommand}" />
                     <TextBlock Text="{Binding FileMessage}"
                                TextWrapping="Wrap"
                                HorizontalAlignment="Center"
@@ -232,7 +307,7 @@
                                  Margin="10"
                                  Width="250"
                                  Height="20"
-                                 Visibility="{Binding Conversion, Converter={StaticResource BoolToVisibility}}" />
+                                 Visibility="{Binding ShowFilesProgress, Converter={StaticResource BoolToVisibility}}" />
                     <TextBlock Text="{Binding ImageMessage}"
                                TextWrapping="Wrap"
                                HorizontalAlignment="Center"
@@ -246,8 +321,7 @@
                                  Margin="10"
                                  Width="250"
                                  Height="20"
-                                 Visibility="{Binding Conversion, Converter={StaticResource BoolToVisibility}}" />
-
+                                 Visibility="{Binding ShowFileProgress, Converter={StaticResource BoolToVisibility}}" />
                 </StackPanel>
             </DockPanel>
         </Grid>

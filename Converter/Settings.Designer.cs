@@ -12,7 +12,7 @@ namespace Converter {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.9.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.8.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -86,24 +86,24 @@ namespace Converter {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("cbz")]
-        public string Format {
+        public string OutputFormat {
             get {
-                return ((string)(this["Format"]));
+                return ((string)(this["OutputFormat"]));
             }
             set {
-                this["Format"] = value;
+                this["OutputFormat"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool FolderOpen {
+        [global::System.Configuration.DefaultSettingValueAttribute("pdf")]
+        public string InputFormat {
             get {
-                return ((bool)(this["FolderOpen"]));
+                return ((string)(this["InputFormat"]));
             }
             set {
-                this["FolderOpen"] = value;
+                this["InputFormat"] = value;
             }
         }
     }

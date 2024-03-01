@@ -14,39 +14,35 @@ public partial class MainView : Window
             Left = (SystemParameters.PrimaryScreenWidth - Width) / 2;
             Top = (SystemParameters.PrimaryScreenHeight - Height) / 2;
         }
-        if (Settings.Default.Format == "cbz")
-            chkCbz.IsChecked = true;
-        else if (Settings.Default.Format == "cbr")
-            chkCbr.IsChecked = true;
-        else
-            chkImages.IsChecked = true;
 
-        chkFolderOpen.IsChecked = Settings.Default.FolderOpen;
+        chkInPdf.IsChecked = Settings.Default.InputFormat == "pdf";
+        chkInCbz.IsChecked = Settings.Default.InputFormat == "cbz";
+        chkInCbr.IsChecked = Settings.Default.InputFormat == "cbr";
+        chkInImages.IsChecked = Settings.Default.InputFormat == "images";
+        chkOutCbz.IsChecked = Settings.Default.OutputFormat == "cbz";
+        chkOutCbr.IsChecked = Settings.Default.OutputFormat == "cbr";
+        chkOutImages.IsChecked = Settings.Default.OutputFormat == "images";
     }
 
     private void CheckBoxClick(object sender, RoutedEventArgs e)
     {
-        CheckBox checkBox = (CheckBox)sender;
+        CheckBox checkBox = (CheckBox)sender;       
 
-        if (checkBox.Name == "chkCbz")
+        if (checkBox.Name.Contains("In"))
         {
-            chkCbr.IsChecked = false;
-            chkImages.IsChecked = false;
+            chkInPdf.IsChecked = checkBox.Name == "chkInPdf";
+            chkInCbz.IsChecked = checkBox.Name == "chkInCbz";
+            chkInCbr.IsChecked = checkBox.Name == "chkInCbr";
+            chkInImages.IsChecked = checkBox.Name == "chkInImages";
+            Settings.Default.InputFormat = checkBox.Name.ToLower()[5..];
         }
-        else if (checkBox.Name == "chkCbr")
+        else
         {
-            chkCbz.IsChecked = false;
-            chkImages.IsChecked = false;
+            chkOutCbz.IsChecked = checkBox.Name == "chkOutCbz";
+            chkOutCbr.IsChecked = checkBox.Name == "chkOutCbr";
+            chkOutImages.IsChecked = checkBox.Name == "chkOutImages";
+            Settings.Default.OutputFormat = checkBox.Name.ToLower()[6..];
         }
-        else if (checkBox.Name == "chkImages")
-        {
-            chkCbz.IsChecked = false;
-            chkCbr.IsChecked = false;
-        }
-        else if (checkBox.Name == "chkFolderOpen")
-            Settings.Default.FolderOpen = (bool)chkFolderOpen.IsChecked!;
-
-
     }
 
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)

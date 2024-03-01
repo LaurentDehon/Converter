@@ -17,11 +17,11 @@
     <Setting Name="Theme" Type="System.String" Scope="User">
       <Value Profile="(Default)">Dracula</Value>
     </Setting>
-    <Setting Name="Format" Type="System.String" Scope="User">
+    <Setting Name="OutputFormat" Type="System.String" Scope="User">
       <Value Profile="(Default)">cbz</Value>
     </Setting>
-    <Setting Name="FolderOpen" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+    <Setting Name="InputFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">pdf</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -106,5 +106,17 @@ namespace Converter {
                 this["InputFormat"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool FolderOpen {
+            get {
+                return ((bool)(this["FolderOpen"]));
+            }
+            set {
+                this["FolderOpen"] = value;
+            }
+        }
     }
 }

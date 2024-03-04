@@ -19,16 +19,20 @@ public partial class MainView : Window
         chkInCbz.IsChecked = Settings.Default.InputFormat == "cbz";
         chkInCbr.IsChecked = Settings.Default.InputFormat == "cbr";
         chkInImages.IsChecked = Settings.Default.InputFormat == "images";
+        chkOutPdf.IsChecked = Settings.Default.OutputFormat == "pdf";
         chkOutCbz.IsChecked = Settings.Default.OutputFormat == "cbz";
         chkOutCbr.IsChecked = Settings.Default.OutputFormat == "cbr";
         chkOutImages.IsChecked = Settings.Default.OutputFormat == "images";
+        chkFolderOpen.IsChecked = Settings.Default.FolderOpen == true;
     }
 
     private void CheckBoxClick(object sender, RoutedEventArgs e)
     {
-        CheckBox checkBox = (CheckBox)sender;       
+        CheckBox checkBox = (CheckBox)sender;
 
-        if (checkBox.Name.Contains("In"))
+        if (checkBox.Name == "chkFolderOpen")
+            Settings.Default.FolderOpen = (bool)chkFolderOpen.IsChecked!;
+        else if (checkBox.Name.Contains("In"))
         {
             chkInPdf.IsChecked = checkBox.Name == "chkInPdf";
             chkInCbz.IsChecked = checkBox.Name == "chkInCbz";
@@ -38,6 +42,7 @@ public partial class MainView : Window
         }
         else
         {
+            chkOutPdf.IsChecked = checkBox.Name == "chkOutPdf";
             chkOutCbz.IsChecked = checkBox.Name == "chkOutCbz";
             chkOutCbr.IsChecked = checkBox.Name == "chkOutCbr";
             chkOutImages.IsChecked = checkBox.Name == "chkOutImages";

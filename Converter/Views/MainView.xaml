@@ -203,6 +203,25 @@
                                    Margin="10" />
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
+                            <CheckBox x:Name="chkOutPdf"
+                                      Checked="CheckBoxClick"
+                                      IsEnabled="{Binding CheckboxesEnabled}"
+                                      VerticalAlignment="Center"
+                                      Height="20"
+                                      Width="20">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Checked">
+                                        <i:InvokeCommandAction Command="{Binding SetOutputFormatCommand}"
+                                                               CommandParameter="pdf" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </CheckBox>
+                            <TextBlock Text="PDF"
+                                       VerticalAlignment="Center"
+                                       Padding="10 0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="15 0 5 5">
                             <CheckBox x:Name="chkOutCbz"
                                       Checked="CheckBoxClick"
                                       IsEnabled="{Binding CheckboxesEnabled}"
@@ -255,6 +274,19 @@
                                 </i:Interaction.Triggers>
                             </CheckBox>
                             <TextBlock Text="Images"
+                                       VerticalAlignment="Center"
+                                       Padding="10 0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="5 20 5 5">
+                            <CheckBox x:Name="chkFolderOpen"
+                                      IsChecked="{Binding FolderOpen}"
+                                      Checked="CheckBoxClick"
+                                      Unchecked="CheckBoxClick"
+                                      VerticalAlignment="Center"
+                                      Height="20"
+                                      Width="20" />
+                            <TextBlock Text="Open folder(s)"
                                        VerticalAlignment="Center"
                                        Padding="10 0" />
                         </StackPanel>

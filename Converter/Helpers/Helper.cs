@@ -27,5 +27,22 @@ namespace Converter.Helpers
         {
             return Directory.GetParent(GetFileFolder(folder))!.FullName;
         }
+
+        public static void DeleteFolder(string folder)
+        {
+            string[] files = Directory.GetFiles(folder);
+            string[] subfolders = Directory.GetDirectories(folder);
+
+            foreach (string file in files)
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+                File.Delete(file);
+            }
+
+            foreach (string subfolder in subfolders)
+                DeleteFolder(subfolder);
+
+            Directory.Delete(folder, false);
+        }
     }    
 }

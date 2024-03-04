@@ -26,5 +26,8 @@
     <Setting Name="FolderOpen" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="PathRAR" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Program Files\WinRAR\WinRAR.exe</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

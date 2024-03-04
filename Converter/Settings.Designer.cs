@@ -118,5 +118,17 @@ namespace Converter {
                 this["FolderOpen"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Program Files\\WinRAR\\WinRAR.exe")]
+        public string PathRAR {
+            get {
+                return ((string)(this["PathRAR"]));
+            }
+            set {
+                this["PathRAR"] = value;
+            }
+        }
     }
 }

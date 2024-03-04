@@ -31,6 +31,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] bool _showFilesProgress = false;
     [ObservableProperty] bool _checkboxesEnabled = true;
     [ObservableProperty] bool _folderOpen;
+    [ObservableProperty] string _pathRAR;
+    [ObservableProperty] bool _pathRARFound;
     [ObservableProperty] System.Windows.Input.Cursor _cursor = System.Windows.Input.Cursors.Arrow;
 
     public MainViewModel()
@@ -39,6 +41,8 @@ public partial class MainViewModel : ObservableObject
         InputFormat = Settings.Default.InputFormat;
         OutputFormat = Settings.Default.OutputFormat;
         FolderOpen = Settings.Default.FolderOpen;
+        PathRAR = Settings.Default.PathRAR;
+        PathRARFound = File.Exists(PathRAR);            
     }
 
     [RelayCommand]
@@ -56,6 +60,17 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    void BrowseForRAR()
+    {
+        OpenFileDialog openFileDialog = new() { Filter = "Executable files (*.exe)|*.exe", Multiselect = false };
+        if (openFileDialog.ShowDialog() == true)
+        {
+            PathRAR = openFileDialog.FileName;
+            PathRARFound = true;
+        }
+    }
+
+    [RelayCommand]
     void OpenFile()
     {        
         Reset();
@@ -63,6 +78,12 @@ public partial class MainViewModel : ObservableObject
         if (InputFormat == OutputFormat)
         {
             FileMessage = "Input and ouput format must be different";
+            return;
+        }
+
+        if (OutputFormat == "cbr" && !PathRARFound)
+        {
+            FileMessage = "Unable to find RAR executable";
             return;
         }
 
@@ -97,6 +118,13 @@ public partial class MainViewModel : ObservableObject
         if (InputFormat == OutputFormat)
         {
             FileMessage = "Input and ouput format must be different";
+            Reset();
+            return;
+        }
+
+        if (OutputFormat == "cbr" && !PathRARFound)
+        {
+            FileMessage = "Unable to find RAR executable";
             return;
         }
 
@@ -166,7 +194,7 @@ public partial class MainViewModel : ObservableObject
                 {
                     images = Helper.GetFilesFromFolder(outputFolder, Constants.ImagesExtensions, false);
                     await CreateArchiveAsync(images, Directory.GetParent(outputFolder)!.FullName, outputFile);
-                    Directory.Delete(outputFolder, true);
+                    Helper.DeleteFolder(outputFolder);
                 }                
                 processedFiles++;
                 FilesProgress = (double)processedFiles / filesCount * 100;
@@ -281,20 +309,19 @@ public partial class MainViewModel : ObservableObject
                 List<string> collectionFiles = files.Select(file => "\"" + file).ToList();
                 string fileList = string.Join("\" ", collectionFiles);
                 fileList += "\"";
-                var arguments = $"A \"{fullPath}\" {fileList} -ep1 -r";
+                string arguments = $"A \"{fullPath}\" {fileList} -ep1 -r";
 
-                var processStartInfo = new ProcessStartInfo
+                ProcessStartInfo processStartInfo = new()
                 {
                     ErrorDialog = false,
                     UseShellExecute = true,
                     Arguments = arguments,
-                    FileName = @"C:\Program Files\WinRAR\WinRAR.exe",
+                    FileName = PathRAR,
                     CreateNoWindow = false,
                     WindowStyle = ProcessWindowStyle.Hidden
                 };
-                var process = Process.Start(processStartInfo);
-
-                process?.WaitForExit();
+                Process process = Process.Start(processStartInfo)!;
+                process.WaitForExit();                
             }
             else if (OutputFormat == "pdf")
             {

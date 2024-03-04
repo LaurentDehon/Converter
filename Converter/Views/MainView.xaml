@@ -126,7 +126,9 @@
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
                             <CheckBox x:Name="chkInPdf"
-                                      Checked="CheckBoxClick"
+                                      IsThreeState="False"
+                                      Checked="CheckBox"
+                                      Unchecked="UncheckBox"
                                       IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
@@ -145,7 +147,9 @@
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
                             <CheckBox x:Name="chkInCbz"
-                                      Checked="CheckBoxClick"
+                                      IsThreeState="False"
+                                      Checked="CheckBox"
+                                      Unchecked="UncheckBox"
                                       IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
@@ -164,7 +168,9 @@
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
                             <CheckBox x:Name="chkInCbr"
-                                      Checked="CheckBoxClick"
+                                      IsThreeState="False"
+                                      Checked="CheckBox"
+                                      Unchecked="UncheckBox"
                                       IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
@@ -183,7 +189,9 @@
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
                             <CheckBox x:Name="chkInImages"
-                                      Checked="CheckBoxClick"
+                                      IsThreeState="False"
+                                      Checked="CheckBox"
+                                      Unchecked="UncheckBox"
                                       IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
@@ -204,7 +212,9 @@
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
                             <CheckBox x:Name="chkOutPdf"
-                                      Checked="CheckBoxClick"
+                                      IsThreeState="False"
+                                      Checked="CheckBox"
+                                      Unchecked="UncheckBox"
                                       IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
@@ -223,7 +233,9 @@
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
                             <CheckBox x:Name="chkOutCbz"
-                                      Checked="CheckBoxClick"
+                                      IsThreeState="False"
+                                      Checked="CheckBox"
+                                      Unchecked="UncheckBox"
                                       IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
@@ -242,7 +254,9 @@
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
                             <CheckBox x:Name="chkOutCbr"
-                                      Checked="CheckBoxClick"
+                                      IsThreeState="False"
+                                      Checked="CheckBox"
+                                      Unchecked="UncheckBox"
                                       IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
@@ -261,7 +275,9 @@
                         <StackPanel Orientation="Horizontal"
                                     Margin="15 0 5 5">
                             <CheckBox x:Name="chkOutImages"
-                                      Checked="CheckBoxClick"
+                                      IsThreeState="False"
+                                      Checked="CheckBox"
+                                      Unchecked="UncheckBox"
                                       IsEnabled="{Binding CheckboxesEnabled}"
                                       VerticalAlignment="Center"
                                       Height="20"
@@ -276,13 +292,14 @@
                             <TextBlock Text="Images"
                                        VerticalAlignment="Center"
                                        Padding="10 0" />
-                        </StackPanel>
+                        </StackPanel>                        
                         <StackPanel Orientation="Horizontal"
                                     Margin="5 20 5 5">
                             <CheckBox x:Name="chkFolderOpen"
+                                      IsThreeState="False"
                                       IsChecked="{Binding FolderOpen}"
-                                      Checked="CheckBoxClick"
-                                      Unchecked="CheckBoxClick"
+                                      Checked="CheckBox"
+                                      Unchecked="CheckBox"
                                       VerticalAlignment="Center"
                                       Height="20"
                                       Width="20" />
@@ -290,10 +307,36 @@
                                        VerticalAlignment="Center"
                                        Padding="10 0" />
                         </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="5 0 5 5">
+                            <CheckBox x:Name="chkPathRARFound"
+                                      IsChecked="{Binding PathRARFound}"
+                                      IsHitTestVisible="False"
+                                      VerticalAlignment="Center"
+                                      Height="20"
+                                      Width="20">
+                            </CheckBox>
+                            <TextBlock Text="(Win)Rar found"
+                                       VerticalAlignment="Center"
+                                       Padding="10 0" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
                 <StackPanel DockPanel.Dock="Right"
                             Margin="20">
+                    <StackPanel Orientation="Horizontal"
+                                Margin="5">
+                        <Button Content="Browse"
+                                Width="100"
+                                Height="50"
+                                Style="{StaticResource RectangleButton}"
+                                Command="{Binding BrowseForRARCommand}" />
+                        <TextBlock VerticalAlignment="Center" Padding="10 0">
+                            <Run Text="Path to (Win)Rar.exe :" />
+                            <LineBreak />
+                            <Run Text="{Binding PathRAR}" />
+                        </TextBlock>
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Center"
                                 Margin="10">

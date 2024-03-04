@@ -26,7 +26,7 @@ public partial class MainView : Window
         chkFolderOpen.IsChecked = Settings.Default.FolderOpen == true;
     }
 
-    private void CheckBoxClick(object sender, RoutedEventArgs e)
+    void CheckBox(object sender, RoutedEventArgs e)
     {
         CheckBox checkBox = (CheckBox)sender;
 
@@ -38,7 +38,7 @@ public partial class MainView : Window
             chkInCbz.IsChecked = checkBox.Name == "chkInCbz";
             chkInCbr.IsChecked = checkBox.Name == "chkInCbr";
             chkInImages.IsChecked = checkBox.Name == "chkInImages";
-            Settings.Default.InputFormat = checkBox.Name.ToLower()[5..];
+            Settings.Default.InputFormat = checkBox.Name.ToLower()[5..];            
         }
         else
         {
@@ -47,6 +47,22 @@ public partial class MainView : Window
             chkOutCbr.IsChecked = checkBox.Name == "chkOutCbr";
             chkOutImages.IsChecked = checkBox.Name == "chkOutImages";
             Settings.Default.OutputFormat = checkBox.Name.ToLower()[6..];
+        }
+    }
+
+    void UncheckBox(object sender, RoutedEventArgs e)
+    {
+        CheckBox checkBox = (CheckBox)sender;
+
+        if (checkBox.Name.Contains("In"))
+        {
+            if (!(bool)chkInPdf.IsChecked! && !(bool)chkInCbz.IsChecked! && !(bool)chkInCbr.IsChecked! && !(bool)chkInImages.IsChecked!)
+                checkBox.IsChecked = true;
+        }
+        else if (checkBox.Name.Contains("Out"))
+        {
+            if (!(bool)chkOutPdf.IsChecked! && !(bool)chkOutCbz.IsChecked! && !(bool)chkOutCbr.IsChecked! && !(bool)chkOutImages.IsChecked!)
+                checkBox.IsChecked = true;
         }
     }
 
@@ -60,15 +76,15 @@ public partial class MainView : Window
         catch (InvalidOperationException) { }
     }
 
-    private void Minimize(object sender, RoutedEventArgs e)
+    void Minimize(object sender, RoutedEventArgs e)
     {
         WindowState = WindowState.Minimized;
     }
 
-    private void Maximize(object sender, RoutedEventArgs e)
+    void Maximize(object sender, RoutedEventArgs e)
     {
         if (WindowState == WindowState.Maximized)
             WindowState = WindowState.Normal;
         else WindowState = WindowState.Maximized;
-    }    
+    }   
 }

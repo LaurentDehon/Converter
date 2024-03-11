@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Drawing;
+using System.IO;
 
 namespace Converter.Helpers
 {
@@ -43,6 +44,18 @@ namespace Converter.Helpers
                 DeleteFolder(subfolder);
 
             Directory.Delete(folder, false);
+        }
+
+        public static bool IsImage(string filePath)
+        {
+            string extension = Path.GetExtension(filePath).ToLower();
+            return Constants.ImagesExtensions.Contains(extension[1..]);
+        }
+
+        public static Size GetImageDimensions(string imagePath)
+        {
+            using Image img = Image.FromFile(imagePath);
+            return new Size(img.Width, img.Height);
         }
     }    
 }

@@ -4,19 +4,27 @@ using Converter.Helpers;
 using Converter.Themes;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using iTextSharp.xmp.impl.xpath;
+using log4net;
 using Microsoft.Win32;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Rar;
 using SharpCompress.Common;
+using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection;
+using System.Text;
 using System.Windows;
+using Image = iTextSharp.text.Image;
 
 namespace Converter.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
+    static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
     List<string> folders = [];
     List<string> files = [];
     string OutputFormat, InputFormat;
@@ -27,6 +35,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] double _filesProgress;
     [ObservableProperty] bool _openButtonsEnabled = true;
     [ObservableProperty] bool _convertButtonEnabled = false;
+    [ObservableProperty] bool _renumberButtonEnabled = false;
     [ObservableProperty] bool _cancelButtonEnabled = false;
     [ObservableProperty] bool _showFilesProgress = false;
     [ObservableProperty] bool _checkboxesEnabled = true;
@@ -42,7 +51,8 @@ public partial class MainViewModel : ObservableObject
         OutputFormat = Settings.Default.OutputFormat;
         FolderOpen = Settings.Default.FolderOpen;
         PathRAR = Settings.Default.PathRAR;
-        PathRARFound = File.Exists(PathRAR);            
+        PathRARFound = File.Exists(PathRAR);
+        log.Info("New session initialized");
     }
 
     [RelayCommand]
@@ -103,6 +113,8 @@ public partial class MainViewModel : ObservableObject
             files = [.. openFileDialog.FileNames];
             folders.Add(Path.GetDirectoryName(files[0])!);
             FileMessage = $"{files.Count} file(s) loaded";
+            if (InputFormat == "images")
+                RenumberButtonEnabled = true;
             ConvertButtonEnabled = true;
             CancelButtonEnabled = true;
             CheckboxesEnabled = false;
@@ -136,7 +148,10 @@ public partial class MainViewModel : ObservableObject
                 if (InputFormat != "images")
                     files.AddRange(Directory.GetFiles(folder, $"*.{InputFormat.ToLower()}"));
                 else
+                {
                     files.AddRange(Helper.GetFilesFromFolder(folder, Constants.ImagesExtensions, false));
+                    RenumberButtonEnabled = true;
+                }
             }
                 
             folders.AddRange(openFolderDialog.FolderNames);
@@ -145,6 +160,23 @@ public partial class MainViewModel : ObservableObject
             CancelButtonEnabled = true;
             CheckboxesEnabled = false;
         }
+    }
+
+    [RelayCommand]
+    async Task Renumber()
+    {
+        await Task.Run(() =>
+        {
+            foreach (string folder in folders)
+            {
+                int counter = 1;
+                foreach (string file in files.Where(f => Path.GetDirectoryName(f) == folder))
+                {
+                    File.Move(file, Path.Combine(Path.GetDirectoryName(file)!, $"{counter:000}.{Path.GetExtension(file)}"));
+                    counter++;
+                }
+            }
+        });
     }
 
     [RelayCommand]
@@ -158,6 +190,7 @@ public partial class MainViewModel : ObservableObject
             CancelButtonEnabled = false;
             ShowFilesProgress = true;
 
+            int failed = 0;
             int filesCount = files.Count;
             int processedFiles = 0;
 
@@ -184,31 +217,45 @@ public partial class MainViewModel : ObservableObject
                     }
                     break;
                 }
-                else if (InputFormat == "pdf")
-                    await ExtractFromPdfAsync(file);
-                else if (InputFormat == "cbz")
-                    await ExtractFromCbzAsync(file);
-                else if (InputFormat == "cbr")
-                    await ExtractFromCbrAsync(file);
-                if (OutputFormat != "images")
+                else
                 {
-                    images = Helper.GetFilesFromFolder(outputFolder, Constants.ImagesExtensions, false);
-                    await CreateArchiveAsync(images, Directory.GetParent(outputFolder)!.FullName, outputFile);
-                    Helper.DeleteFolder(outputFolder);
-                }                
+                    try 
+                    { 
+                        await ExtractAsync(file);
+                    }
+                    catch (Exception)
+                    {
+                        log.Error($"Extraction of {Path.GetFileName(file)} failed");
+                        failed++;
+                        Helper.DeleteFolder(outputFolder);
+                    }
+
+                    if (OutputFormat != "images")
+                    {
+                        images = Helper.GetFilesFromFolder(outputFolder, Constants.ImagesExtensions, false);
+                        await CreateArchiveAsync(images, Directory.GetParent(outputFolder)!.FullName, outputFile);
+                        Helper.DeleteFolder(outputFolder);
+                    }
+                }
                 processedFiles++;
                 FilesProgress = (double)processedFiles / filesCount * 100;
             }
-
+                        
             if (FolderOpen)
                 if (FileSelection)
-                    foreach (string folder in folders.Distinct())
-                        Process.Start("explorer.exe", folder); 
+                {
+                    if (failed < filesCount)
+                        foreach (string folder in folders.Distinct())
+                            Process.Start("explorer.exe", folder); 
+                }
                 else
                     Process.Start("explorer.exe", Directory.GetParent(folders[0])!.FullName);
 
             string text = OutputFormat == "images" ? "extracted" : "converted";
-            FileMessage = $"{files.Count} file(s) successfully {text}";
+            FileMessage = $"{files.Count - failed} file(s) successfully {text}";
+            if (failed > 0)
+                FileMessage += $"\n{failed} file(s) failed";
+
             Cursor = System.Windows.Input.Cursors.Arrow;
             OpenButtonsEnabled = true;
             ConvertButtonEnabled = false;
@@ -226,6 +273,12 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    static void OpenLog()
+    {
+        Process.Start("notepad.exe", @$"Logs\{DateTime.Now:yyyy-MM-dd}.log");
+    }
+
+    [RelayCommand]
     void ThemeSelect(string header)
     {
         ThemeManager.LoadTheme(header);
@@ -240,51 +293,58 @@ public partial class MainViewModel : ObservableObject
         Application.Current.Shutdown();
     }
 
-    async Task ExtractFromCbzAsync(string file)
+    async Task ExtractAsync(string file)
     {
-        string fileFolder = Helper.GetFileFolder(file);
         await Task.Run(() =>
         {
+            string fileFolder = Helper. GetFileFolder(file);
             FileMessage = $"Extracting from {Path.GetFileName(file)}";
-            ZipFile.ExtractToDirectory(file, fileFolder, true);
-        });
-    }
+            log.Info($"Extraction of {Path.GetFileName(file)} in progress");
+            Directory.CreateDirectory(fileFolder);
 
-    async Task ExtractFromCbrAsync(string file)
-    {
-        string fileFolder = Helper.GetFileFolder(file);
-        Directory.CreateDirectory(fileFolder);
-
-        await Task.Run(() =>
-        {
-            FileMessage = $"Extracting from {Path.GetFileName(file)}";
-            RarArchive archive = RarArchive.Open(file);
-            foreach (RarArchiveEntry entry in archive.Entries.Where(entry => !entry.IsDirectory))
+            if (InputFormat == "cbz")
             {
-                entry.WriteToDirectory(fileFolder, new ExtractionOptions()
+                int index = 1;
+                using ZipArchive archive = ZipFile.OpenRead(file);
+                foreach (ZipArchiveEntry entry in archive.Entries.Where(e => Helper.IsImage(e.Name)))
                 {
-                    ExtractFullPath = true,
-                    Overwrite = true
-                });
+                    string fileName = $"{index:000}{Path.GetExtension(entry.FullName)}";
+                    entry.ExtractToFile(Path.Combine(fileFolder, fileName));
+                    System.Drawing.Size imageSize = Helper.GetImageDimensions(Path.Combine(fileFolder, fileName));
+                    if (imageSize.Width > imageSize.Height)
+                        log.Info($"Image {Path.GetFileName(fileName)} is in landscape orientation");
+                    index++;
+                }
             }
-        });
-    }
-
-    async Task ExtractFromPdfAsync(string file)
-    {
-        string fileFolder = Helper.GetFileFolder(file);
-        Directory.CreateDirectory(fileFolder);
-
-        await Task.Run(() =>
-        {
-            FileMessage = $"Extracting from {Path.GetFileName(file)}";
-            using PdfReader reader = new(file);
-            for (int pageNumber = 1; pageNumber <= reader.NumberOfPages; pageNumber++)
+            else if (InputFormat == "cbr")
             {
-                PdfDictionary page = reader.GetPageN(pageNumber);
-                PdfDictionary resources = page.GetAsDict(PdfName.RESOURCES);
-                ExtractImagesFromResources(resources, fileFolder, pageNumber);
+                int index = 1;
+                RarArchive archive = RarArchive.Open(file);
+                foreach (RarArchiveEntry entry in archive.Entries.Where(e => !e.IsDirectory && Helper.IsImage(e.Key)))
+                {
+                    string fileName = $"{index:000}{Path.GetExtension(entry.Key)}";
+                    entry.WriteToFile(Path.Combine(fileFolder, fileName), new ExtractionOptions()
+                    {
+                        ExtractFullPath = true,
+                        Overwrite = true
+                    });
+                    System.Drawing.Size imageSize = Helper.GetImageDimensions(Path.Combine(fileFolder, fileName));
+                    if (imageSize.Width > imageSize.Height)
+                        log.Info($"Image {Path.GetFileName(fileName)} is in landscape orientation");
+                    index++;
+                }
             }
+            else
+            {
+                using PdfReader reader = new(file);
+                for (int pageNumber = 1; pageNumber <= reader.NumberOfPages; pageNumber++)
+                {
+                    PdfDictionary page = reader.GetPageN(pageNumber);
+                    PdfDictionary resources = page.GetAsDict(PdfName.RESOURCES);
+                    ExtractImagesFromResources(resources, fileFolder, pageNumber);
+                }
+            }
+            log.Info($"Extraction of {Path.GetFileName(file)} successfull");
         });
     }
 
@@ -294,6 +354,7 @@ public partial class MainViewModel : ObservableObject
         {
             string fullPath = Path.Combine(outputFolder, outputFile);
             FileMessage = $"Creating archive {outputFile}";
+            log.Info($"Creation of {outputFile} in progress");
 
             if (File.Exists(fullPath))
                 File.Delete(fullPath);
@@ -327,7 +388,7 @@ public partial class MainViewModel : ObservableObject
             {
                 float h = Image.GetInstance(files[0]).ScaledHeight;
                 float w = Image.GetInstance(files[0]).ScaledWidth;
-                Document document = new(new Rectangle(w, h), 0f, 0f, 0f, 0f);
+                Document document = new(new iTextSharp.text.Rectangle(w, h), 0f, 0f, 0f, 0f);
                 PdfWriter.GetInstance(document, new FileStream(fullPath, FileMode.Create));
                 document.Open();
                 foreach (string file in files)
@@ -338,6 +399,7 @@ public partial class MainViewModel : ObservableObject
                 }
                 document.Close();
             }
+            log.Info($"Creation of {outputFile} successfull");
         });
     }
 
@@ -386,7 +448,15 @@ public partial class MainViewModel : ObservableObject
                 }
 
                 if (bytes != null)
-                    File.WriteAllBytes($@"{outputFolder}\{pageNumber:000}.jpeg", bytes);
+                {
+                    string imagePath = $@"{outputFolder}\{pageNumber:000}.jpg";
+                    File.WriteAllBytes(imagePath, bytes);
+
+                    using (var image = System.Drawing.Image.FromFile(imagePath))
+                    if (image.Width > image.Height)
+                        log.Info($"Image {Path.GetFileName(imagePath)} is in landscape orientation");
+
+                }
                 else if (PdfName.FORM.Equals(subType))
                     ExtractImagesFromResources(dict.GetAsDict(PdfName.RESOURCES), outputFolder, pageNumber);
             }
